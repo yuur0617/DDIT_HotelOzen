@@ -1,0 +1,52 @@
+package kr.or.ddit.cstmr.rsvt.controller;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.cstmr.rsvt.service.CstmrRsvtService;
+import kr.or.ddit.global.vo.CstmrVO;
+import kr.or.ddit.global.vo.RecomRoomVO;
+import kr.or.ddit.global.vo.RsvtVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("cstmr/rsvt/rmtList")
+public class CstmrRsvtRmtRetrieveController {
+	
+	@Inject
+	private CstmrRsvtService service;
+
+	@GetMapping
+	public String rmtList() {
+		return "cstmr/rsvt/rmtList";
+	}
+	
+	@PostMapping
+	public String rcRmList(
+		 String adult, String child
+	) {
+		int totalNmpr = Integer.parseInt(adult)+Integer.parseInt(child);
+		String cstNo = "M2400019"; //추후 가져와야됨.
+		CstmrVO cstmr = service.retrieveCstmrAge(cstNo);
+		String age = cstmr.getAge();
+		
+		Map<String, Object> customerData = new HashMap<>();
+        customerData.put("age", age);
+        customerData.put("totalNmpr", totalNmpr);
+		
+		List<RsvtVO> rcRm = service.retrieveRcRm(customerData);
+		
+		log.info("#########################rcRm:{}", rcRm);
+		
+		return null;
+	}
+}

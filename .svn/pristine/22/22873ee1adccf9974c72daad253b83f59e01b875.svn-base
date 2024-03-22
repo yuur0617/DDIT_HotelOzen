@@ -1,0 +1,24 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+
+<link href="${pageContext.request.contextPath}/resources/css/cstmr/intrcn/room/roomList.css" rel="stylesheet">
+
+<section>
+	<div>
+		<div class="location-header mx-10">
+			<h1 class="cstmr-title mx-5">ROOM</h1>
+			<div class="room-meun-tab acco">
+				<ul>
+					<li><a id="standardMove" href="${pageContext.request.contextPath}/room/standard.do">STANDARD</a></li>
+					<li class="current"><a id="deluxeMove" href="${pageContext.request.contextPath}/room/deluxe.do">DELUXE</a></li>
+					<li><a id="suiteMove" href="${pageContext.request.contextPath}/room/suite.do">SUITE</a></li>
+					<li><a id="suiteMove" href="${pageContext.request.contextPath}/room/special.do">SPECIAL</a></li>
+				</ul>
+			</div>
+			
+		</div>
+	</div>
+</section>

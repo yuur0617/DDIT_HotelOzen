@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.OprtnSttsMapper">
+
+	<select id="fxtrsStatus" parameterType="string">
+		SELECT 
+		    RQST_NO         
+		    , RQST_SN       
+		    , EMP_NO        
+		    , RQST_YMD      
+		    , RQST_AMNT     
+		    , RQST_SE       
+		    , RQST_RQ_YMD   
+		    , RQST_PURCHS_YMD   
+		    , EMP_RQ_NO     
+		    , EMP_PURCHS_NO 
+		FROM TB_FXTRS_RQST
+		WHERE EMP_NO = #{empNo} OR EMP_RQ_NO = #{empRqNo} OR EMP_PURCHS_NO = #{empPurchsNo}
+	</select>
+
+	<select id="annualStatus" parameterType="string">
+		SELECT
+		    ANL_LEA_USE_NO
+		    , EMP_NO
+		    , ANL_LEA_BGN_YMD
+		    , ANL_LEA_END_YMD
+		    , ANL_LEA_RM
+		    , ANL_LEA_INFO
+		    , ANL_LEA_YMD
+		    , EMP_RQ_NO
+		FROM TB_ANNUAL_LEAVE_USE
+		WHERE EMP_NO = #{empNo} OR EMP_RQ_NO = #{empRqNo}
+	</select>
+
+</mapper>

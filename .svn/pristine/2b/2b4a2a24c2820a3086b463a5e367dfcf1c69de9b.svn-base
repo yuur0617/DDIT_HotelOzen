@@ -1,0 +1,20 @@
+package kr.or.ddit.emp.pms.stay.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping("/emp/pms/stay")
+public class EmpPmsStayChkinControlelr {
+
+	@GetMapping("checkinList.do")
+	public String stayChkinList() {
+		return "emp/pms/stay/checkInList";
+	}
+	
+	@GetMapping("checkin.do")
+	public String stayChkin() {
+		return "emp/pms/stay/checkIn";
+	}
+}

@@ -1,0 +1,28 @@
+package kr.or.ddit.emp.pbl.oprtnstts.service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.global.vo.AnnualVO;
+import kr.or.ddit.global.vo.FxtrsRqstVO;
+import kr.or.ddit.mybatis.mappers.OprtnSttsMapper;
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class EmpOprtnsttsServiceImpl implements EmpOprtnsttsService {
+
+	private final OprtnSttsMapper dao;
+	
+	@Override
+	public List<FxtrsRqstVO> fxtrsStatusList(String empNo, String empRqNo, String empPurchsNo) {
+		return dao.fxtrsStatus(empNo, empRqNo, empPurchsNo);
+	}
+
+	@Override
+	public List<AnnualVO> annualStatusList(String empNo, String empRqNo) {
+		return dao.annualStatus(empNo, empRqNo);
+	}
+
+}

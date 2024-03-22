@@ -1,0 +1,34 @@
+package kr.or.ddit.cstmr.rsvt.service;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.global.vo.CstmrVO;
+import kr.or.ddit.global.vo.RecomRoomVO;
+import kr.or.ddit.global.vo.RsvtVO;
+import kr.or.ddit.mybatis.mappers.CstmrRsvtMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class CstmrRsvtServiceImpl implements CstmrRsvtService {
+
+	private final CstmrRsvtMapper dao;
+	
+	@Override
+	public CstmrVO retrieveCstmrAge(String cstNo) {
+		CstmrVO cstmr = dao.select(cstNo);
+		return cstmr;
+	}
+
+	@Override
+	public List<RsvtVO> retrieveRcRm(Map<String, Object> customerData) {
+		List<RsvtVO> rcRm = dao.selectRcRm(customerData);
+		return rcRm;
+	}
+
+}

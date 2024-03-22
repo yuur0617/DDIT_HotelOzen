@@ -1,0 +1,26 @@
+package kr.or.ddit.mybatis.mappers;
+
+import javax.inject.Inject;
+
+import org.junit.jupiter.api.Test;
+
+import kr.or.ddit.AbstractRootContextTest;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+class OprtnSttsMapperTest extends AbstractRootContextTest{
+	
+	@Inject
+	private OprtnSttsMapper dao;
+
+	@Test
+	void fxtrsTest() {
+		log.info("fxtrsss {}",dao.fxtrsStatus("E120002", "E120002", "E120002"));
+	}
+	
+	@Test
+	void annualTest() {
+		log.info("annualll {}", dao.annualStatus("E230001", "E120001"));
+	}
+
+}

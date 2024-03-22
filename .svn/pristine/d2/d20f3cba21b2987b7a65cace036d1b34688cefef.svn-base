@@ -1,0 +1,15 @@
+package kr.or.ddit.mybatis.mappers;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import kr.or.ddit.global.vo.CstmrVO;
+import kr.or.ddit.global.vo.RsvtVO;
+
+@Mapper
+public interface CstmrRsvtMapper extends AbstractCommonMapper<CstmrVO, String>{
+
+	List<RsvtVO> selectRcRm(Map<String, Object> parameterMap);
+}

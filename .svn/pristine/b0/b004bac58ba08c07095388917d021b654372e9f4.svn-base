@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mybatis.mappers.CstmrRsvtMapper">
+
+	<select id="select" resultType="CstmrVO" parameterType="String">
+		SELECT 
+			CST_NO
+			, CST_NM
+			, CST_BIRTH
+			, FLOOR(((2000 - EXTRACT(YEAR FROM CST_BIRTH) + TO_CHAR(SYSDATE, 'YY')) + 1)/10) AS AGE
+		FROM 
+			TB_CSTMR
+		WHERE 
+			CST_NO = #{cstNo}
+	</select>
+	
+	<resultMap type="RecomRoomVO" id="RcRmMap">
+		<id property="rermAge" column="RERM_AGE"/>
+	</resultMap>
+	
+	<select id="selectRcRm" parameterType="RecomRoomVO" resultMap="RcRmMap">
+		SELECT 
+		    RERM_RMTYPE
+		    , RERM_RANK
+		FROM 
+		    TB_RECOM_RM
+		WHERE 
+		    RERM_AGE = #{age} AND RERM_NMPR = #{totalNmpr}
+	</select>
+</mapper>
