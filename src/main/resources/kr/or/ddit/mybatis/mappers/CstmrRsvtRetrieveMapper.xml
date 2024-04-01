@@ -24,6 +24,8 @@
 				 INNER JOIN TB_RSVT_DETAILS USING (RSVT_NO)
     WHERE RSVT_NO = #{rsvt[0].rsvtNo}
 			AND CST_HP = #{cstHp}
+			AND RSVT_CNCL_YN = 'N'
+			AND RSVT_CHECKOUT_YMD <![CDATA[ >= ]]> SYSDATE
 	GROUP BY RSVT_NO
 			, CST_NO
 			, RSVT_AMNT
@@ -56,15 +58,84 @@
 	FROM TB_RSVT INNER JOIN TB_RSVT_DETAILS USING (RSVT_NO)
 				 INNER JOIN TB_CSTMR USING (CST_NO)
 				 INNER JOIN TB_ROOM_TYPE USING (RMT_TYPE_CD)
-	<![CDATA[
+	
 	WHERE 
 		RSVT_NO = #{rsvtNo} 
-		AND RSVT_CHECKIN_YMD >= SYSDATE
+		AND RSVT_CHECKOUT_YMD <![CDATA[ >= ]]> SYSDATE
 		AND RSVT_CNCL_YN = 'N'
+	ORDER BY RSVT_CHECKIN_YMD
+	
+</select>
+<select id="selectMberRsvtList"  resultType="RsvtVO">
+	SELECT 
+		RSVT_NO
+		, CST_NO
+		, RSVT_AMNT
+		, RSVT_YMD
+		, RSVT_CHECKIN_YMD
+		, RSVT_CHECKOUT_YMD
+		, RSVT_CNCL_YN
+		, RSVT_ROOM_CNT
+		, RSVT_ADULT_CNT
+		, RSVT_CHILD_CNT
+		, RSVT_SETLE_NO
+	FROM TB_RSVT INNER JOIN TB_CSTMR USING (CST_NO)
+		INNER JOIN TB_RSVT_DETAILS USING (RSVT_NO)
+	<![CDATA[
+    WHERE 
+    	CST_NO = #{cstNo} 
+    	AND RSVT_CHECKIN_YMD >= SYSDATE-1
+    	AND RSVT_CNCL_YN = 'N'
+    	AND RSVT_SE = '예약중'
+    GROUP BY RSVT_NO
+    		, CST_NO
+		, RSVT_AMNT
+		, RSVT_YMD
+		, RSVT_CHECKIN_YMD
+		, RSVT_CHECKOUT_YMD
+		, RSVT_CNCL_YN
+		, RSVT_ROOM_CNT
+		, RSVT_ADULT_CNT
+		, RSVT_CHILD_CNT
+		, RSVT_SETLE_NO
 	ORDER BY RSVT_CHECKIN_YMD
 	]]>
 </select>
-<select id="selectMberRsvtList" parameterType="CstmrVO" resultType="RsvtVO">
+
+<resultMap type="RsvtDetailsVO" id="rsvtDetailsMap" autoMapping="true">
+	<collection property="roomTypeVO" ofType="RoomTypeVO" autoMapping="true">
+		<result property="rmtTypeCd" column="RMT_TYPE_CD"/>
+	</collection>
+</resultMap>
+<select id="selectRsvtDetailsList"  resultMap="rsvtDetailsMap">
+	SELECT
+        RSVT_NO
+        , RSVT_DTL_NO
+		, RSVT_AMNT
+		, RSVT_YMD
+		, RSVT_CHECKIN_YMD
+		, RSVT_CHECKOUT_YMD
+		, RSVT_ROOM_CNT
+		, RSVT_DTL_AMNT
+		, RSVT_DTL_ADULT_CNT
+		, RSVT_DTL_CHILD_CNT
+		, RSVT_SE
+		, RMT_TYPE_CD
+		, RMT_NM_DETAILS
+		, RMT_NM
+	FROM TB_RSVT INNER JOIN TB_RSVT_DETAILS USING (RSVT_NO)
+				 INNER JOIN TB_CSTMR USING (CST_NO)
+				 INNER JOIN TB_ROOM_TYPE USING (RMT_TYPE_CD)
+	<![CDATA[
+	WHERE 
+		RSVT_NO = #{rsvtNo} 
+		AND RSVT_CHECKIN_YMD >= SYSDATE -1
+		AND RSVT_CNCL_YN = 'N'
+		AND RSVT_SE = '예약중'
+	ORDER BY RSVT_CHECKIN_YMD
+	]]>
+</select>
+<select id="selectMberEndRsvtList" resultType="RsvtVO">
 	SELECT 
 		RSVT_NO
 		, RSVT_AMNT
@@ -76,50 +147,12 @@
 		, RSVT_ADULT_CNT
 		, RSVT_CHILD_CNT
 	FROM TB_RSVT INNER JOIN TB_CSTMR USING (CST_NO)
-	<![CDATA[
-    WHERE 
-    	CST_NO = #{cstNo} 
-    	AND RSVT_CHECKIN_YMD >= SYSDATE
+				 INNER JOIN TB_RSVT_DETAILS USING (RSVT_NO)
+    WHERE CST_NO = #{cstNo} 
+    	AND RSVT_CHECKIN_YMD <![CDATA[ <= ]]> SYSDATE
     	AND RSVT_CNCL_YN = 'N'
-	ORDER BY RSVT_CHECKIN_YMD
-	]]>
-</select>
-
-<resultMap type="RsvtDetailsVO" id="rsvtDetailsMap" autoMapping="true">
-	<collection property="roomTypeVO" ofType="RoomTypeVO" autoMapping="true">
-		<result property="rmtTypeCd" column="RMT_TYPE_CD"/>
-	</collection>
-</resultMap>
-<select id="selectRsvtDetailsList" parameterType="RsvtVO" resultMap="rsvtDetailsMap">
-	SELECT
-        RSVT_NO
-        , RSVT_DTL_NO
-		, RSVT_AMNT
-		, RSVT_YMD
-		, RSVT_CHECKIN_YMD
-		, RSVT_CHECKOUT_YMD
-		, RSVT_ROOM_CNT
-		, RSVT_DTL_AMNT
-		, RSVT_DTL_ADULT_CNT
-		, RSVT_DTL_CHILD_CNT
-		, RSVT_SE
-		, RMT_TYPE_CD
-		, RMT_NM_DETAILS
-		, RMT_NM
-	FROM TB_RSVT INNER JOIN TB_RSVT_DETAILS USING (RSVT_NO)
-				 INNER JOIN TB_CSTMR USING (CST_NO)
-				 INNER JOIN TB_ROOM_TYPE USING (RMT_TYPE_CD)
-	<![CDATA[
-	WHERE 
-		RSVT_NO = #{rsvtNo} 
-		AND RSVT_CHECKIN_YMD >= SYSDATE
-		AND RSVT_CNCL_YN = 'N'
-	ORDER BY RSVT_CHECKIN_YMD
-	]]>
-</select>
-<select id="selectMberEndRsvtList" parameterType="CstmrVO" resultType="RsvtVO">
-		SELECT 
-		RSVT_NO
+    	AND (RSVT_SE = '투숙중' OR RSVT_SE = '사용완료')
+    GROUP BY RSVT_NO
 		, RSVT_AMNT
 		, RSVT_YMD
 		, RSVT_CHECKIN_YMD
@@ -128,15 +161,10 @@
 		, RSVT_ROOM_CNT
 		, RSVT_ADULT_CNT
 		, RSVT_CHILD_CNT
-	FROM TB_RSVT INNER JOIN TB_CSTMR USING (CST_NO)
-	<![CDATA[
-    WHERE CST_NO = #{cstNo} 
-    	AND RSVT_CHECKOUT_YMD < SYSDATE
-    	AND RSVT_CNCL_YN = 'N'
-	ORDER BY RSVT_CHECKIN_YMD
-	]]>
+	ORDER BY RSVT_CHECKIN_YMD DESC
+	
 </select>
-<select id="selectEndRsvtDetailsList" parameterType="RsvtVO" resultMap="rsvtDetailsMap">
+<select id="selectEndRsvtDetailsList" resultMap="rsvtDetailsMap">
 	SELECT
         RSVT_NO
         , RSVT_DTL_NO
@@ -155,15 +183,30 @@
 	FROM TB_RSVT INNER JOIN TB_RSVT_DETAILS USING (RSVT_NO)
 				 INNER JOIN TB_CSTMR USING (CST_NO)
 				 INNER JOIN TB_ROOM_TYPE USING (RMT_TYPE_CD)
-	<![CDATA[
+	
 	WHERE 
 		RSVT_NO = #{rsvtNo} 
-		AND RSVT_CHECKOUT_YMD < SYSDATE
+		AND RSVT_CHECKIN_YMD <![CDATA[ <= ]]> SYSDATE
 		AND RSVT_CNCL_YN = 'N'
-	ORDER BY RSVT_CHECKIN_YMD
-	]]>
+		AND (RSVT_SE = '투숙중' OR RSVT_SE = '사용완료')
+	 GROUP BY  RSVT_NO
+        , RSVT_DTL_NO
+		, RSVT_AMNT
+		, RSVT_YMD
+		, RSVT_CHECKIN_YMD
+		, RSVT_CHECKOUT_YMD
+		, RSVT_ROOM_CNT
+		, RSVT_DTL_AMNT
+		, RSVT_DTL_ADULT_CNT
+		, RSVT_DTL_CHILD_CNT
+		, RSVT_SE
+		, RMT_TYPE_CD
+		, RMT_NM_DETAILS
+		, RMT_NM
+	ORDER BY RSVT_CHECKIN_YMD DESC
+	
 </select>
-<select id="selectMberCancelRsvtList" parameterType="CstmrVO" resultType="RsvtVO">
+<select id="selectMberCancelRsvtList" resultType="RsvtVO">
 		SELECT 
 		RSVT_NO
 		, RSVT_AMNT
@@ -178,10 +221,10 @@
 	<![CDATA[
     WHERE CST_NO = #{cstNo} 
     	AND RSVT_CNCL_YN = 'Y'
-	ORDER BY RSVT_CHECKIN_YMD
+	ORDER BY RSVT_CHECKIN_YMD DESC
 	]]>
 </select>
-<select id="selectCancelRsvtDetailsList" parameterType="RsvtVO" resultMap="rsvtDetailsMap">
+<select id="selectCancelRsvtDetailsList"  resultMap="rsvtDetailsMap">
 	SELECT
         RSVT_NO
         , RSVT_DTL_NO
@@ -204,20 +247,20 @@
 	WHERE 
 		RSVT_NO = #{rsvtNo} 
 		AND RSVT_CNCL_YN = 'Y'
-	ORDER BY RSVT_CHECKIN_YMD
+	ORDER BY RSVT_CHECKIN_YMD DESC
 	]]>
 </select>
-<update id="rsvtCancel" parameterType="String">
+<update id="rsvtCancel" >
 	UPDATE TB_RSVT
 		SET RSVT_CNCL_YN = 'Y'
 	WHERE RSVT_NO = #{rsvtNo}
 </update>
-<update id="updateSetle">
+<update id="updateSetle" >
 	UPDATE TB_SETLE
-		SET SETLE_STTUS_CD = 'C'
-	WEHRE SETLE_NO = #{setleNo}
+		SET SETLE_STTUS_CD = 'N'
+	WHERE SETLE_NO = #{rsvtSetleNo}
 </update>
-<insert id="insertRefnd">
+<insert id="insertRefnd" parameterType="RefndVO">
 	INSERT INTO TB_REFND(
 		REFND_NO
 		, SETLE_NO
@@ -230,17 +273,17 @@
 		#{refndNo}
 		, #{setleNo}
 		, #{refndPlcyNo}
-		, #{refndCncdeYmd}
+		, SYSDATE
 		, #{refndAmnt}
-		, #{refndYmd}
-		, #{refndSttus}
+		, SYSDATE
+		, 'Y'
 	)
 </insert>
 <select id="selectNewRefndNo">
 	SELECT
    		CASE
     	WHEN COUNT(*) > 0 THEN 'REF' || TO_CHAR(SYSDATE, 'YYMM') ||
-       		LPAD(MAX(SUBSTR((REFND_NO), -1, 3)) + 1, 3, '0')
+       		LPAD(MAX(SUBSTR((REFND_NO), -3)) + 1, 3, '0')
     	ELSE
         	'REF' || TO_CHAR(SYSDATE, 'YYMM') || LPAD('1', 3, '0')
     	END
@@ -262,4 +305,9 @@
 	FROM TB_SETLE
 	WHERE SETLE_NO = #{setleNo}
 </select>
+<update id="updateRsvtDetails" parameterType="RsvtVO">
+	UPDATE TB_RSVT_DETAILS
+		SET RSVT_SE = '예약취소'
+	WHERE RSVT_NO = #{rsvtNo}
+</update>
 </mapper>

@@ -37,7 +37,7 @@
 			    WHEN MBS_GRD_CD LIKE '%BLUE' THEN 1
 			    WHEN MBS_GRD_CD LIKE '%GREEN' THEN 2
 			    WHEN MBS_GRD_CD LIKE '%RED' THEN 3
-			    WHEN MBS_GRD_CD LIKE '%BLACK' THEN 3
+			    WHEN MBS_GRD_CD LIKE '%BLACK' THEN 4
 		END
 	</select>
 	
@@ -75,12 +75,26 @@
 		END
 	</select>
 	
-	<select id="selectOne" resultType="MbrshGrdVO">
+	<resultMap type="MbrshGrdVO" id="mbrshGrdOne" autoMapping="true">
+		<id property="mbsGrdCd" column="MBS_GRD_CD"/>
+		<collection property="couponList" javaType="list" ofType="CouponVO" autoMapping="true"/>
+	</resultMap>
+	
+	<select id="selectOne" resultMap="mbrshGrdOne">
 		SELECT 
-		    MBS_GRD_CD
-		    , MBS_GRD_AMNT 
-		FROM TB_MBRSH_GRD
-		WHERE MBS_GRD_CD = #{grd}
+            MBS_GRD_CD
+            , MBS_GRD_NM
+            , MBS_GRD_AMNT
+            , MBS_GRD_PRK
+            , CPNK_NO
+            , CPN_PRV_CNT
+            , CPNK_NM
+            , CPN_USE
+            , CPN_DSCNT_PRICE
+        FROM TB_MBRSH_GRD 
+            INNER JOIN tb_mbrsh_bnf USING (MBS_GRD_CD)
+            INNER JOIN TB_COUPON USING (CPNK_NO)
+        WHERE MBS_GRD_CD = #{grd}
 	</select>
 	
 	<select id="selectCouponList">
@@ -97,5 +111,39 @@
 		SELECT MBS_GRD_CD, CPNK_NO, CPN_PRV_CNT
 		FROM CPN_PRV_CNT_RECURSIVE
 		]]>
+	</select>
+	
+	<select id="selectMbrshList" resultType="MbrshGrdVO">
+		SELECT
+		    MBS_GRD_CD
+		    , MBS_GRD_NM
+		FROM TB_MBRSH_GRD
+	</select>
+	
+	<select id="selectUserMbershList">
+		SELECT 
+		    CST_NO
+		    , MBS_GRD_CD
+		    , MBS_SBSCRB_YMD
+		    , MBS_EXPRT_YMD
+		    , MBS_SETLE_AMNT
+		FROM TB_MBRSH_SETLE
+		WHERE CST_NO = #{cstNo}
+		ORDER BY MBS_SBSCRB_YMD DESC
+	</select>
+	
+	<select id="selectMbrshCountList">
+		SELECT 
+		    COUNT(*) TOTAL_MBER
+		    , SUM(
+		        CASE 
+		            WHEN MBS_GRD_CD IS NULL THEN 1 ELSE 0 
+		        END) AS NON_MBS_MBER
+		    , SUM(
+		        CASE 
+		            WHEN MBS_GRD_CD IS NOT NULL THEN 1 ELSE 0 
+		        END) AS MBS_MBER
+		FROM TB_MBER
+		LEFT OUTER JOIN TB_MBRSH_SETLE USING (CST_NO)
 	</select>
 </mapper>

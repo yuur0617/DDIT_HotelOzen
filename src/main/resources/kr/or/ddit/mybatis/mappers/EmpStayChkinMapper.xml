@@ -45,6 +45,10 @@
 	    </association>
 	    <collection property="rsvtDetails" javaType="list" ofType="RsvtDetailsVO" autoMapping="true">
 	        <id property="rmtTypeCd" column="RMT_TYPE_CD"/>
+	        <association property="roomTypeVO" javaType="RoomTypeVO">
+	        	<id property="rmtTypeCd" column="RMT_TYPE_CD"/>
+	        	<result property="rmtNmDetails" column="RMT_NM_DETAILS"/>
+	        </association>
 	    </collection>
 	</resultMap>
 
@@ -59,6 +63,7 @@
 		            , RSVT_YMD
 		            , RSVT_CHECKIN_YMD
 		            , RMT_TYPE_CD
+		            , RMT_NM_DETAILS
 		            , RSVT_ROOM_CNT
 		            , RSVT_ADULT_CNT
 		            , RSVT_CHILD_CNT
@@ -71,6 +76,7 @@
 		            TB_RSVT
 		            INNER JOIN TB_RSVT_DETAILS USING(RSVT_NO)
 		            INNER JOIN TB_CSTMR USING(CST_NO)
+		            INNER JOIN TB_ROOM_TYPE USING (RMT_TYPE_CD)
 		        <include refid="chkinList" />
 		        ORDER BY RSVT_DTL_NO DESC
 		    )A

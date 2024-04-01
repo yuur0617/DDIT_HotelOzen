@@ -17,6 +17,13 @@
 		<org.springframework.security-version>5.7.1</org.springframework.security-version>
 	</properties>
 	<dependencies>
+		<!-- 프로퍼티스 암호화 -->
+		<dependency>
+		    <groupId>org.jasypt</groupId>
+		    <artifactId>jasypt-spring31</artifactId>
+		    <version>1.9.3</version>
+		</dependency>
+		
 		<!-- Spring DI Container -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -233,6 +240,43 @@
 			<artifactId>jcl-over-slf4j</artifactId>
 			<version>1.7.25</version>
 		</dependency>
+
+
+	
+		<!-- WebSocket Messenger -->
+		<!-- jdk8에 필요 -->
+		<dependency>
+			<groupId>javax.websocket</groupId>
+			<artifactId>javax.websocket-api</artifactId>
+			<version>1.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.json</artifactId>
+			<version>1.0.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
+			<version>1.9.2</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.java-websocket/Java-WebSocket -->
+		<dependency>
+			<groupId>org.java-websocket</groupId>
+			<artifactId>Java-WebSocket</artifactId>
+			<version>1.5.4</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.json/json -->
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20230618</version>
+		</dependency>
+		<!-- 공통컴포넌트 끝 -->
+
+
+
 
 
 		<!-- 단위 테스트 지원용 -->

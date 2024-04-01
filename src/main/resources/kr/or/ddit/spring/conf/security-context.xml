@@ -13,7 +13,7 @@
 		id="passwordEncoder"></beans:bean>
 	<beans:bean 
 		id="authenticationSuccessHandler" 
-		class="kr.or.ddit.global.security.handler.CustomAuthenticationSuccessHandler"
+		class="kr.or.ddit.global.security.handler.CustomAuthenticationSuccessHandler" 
 		p:defaultTargetUrl="/"
 		p:alwaysUseDefaultTargetUrl="false"
 	/>
@@ -55,6 +55,10 @@
 		/>		
 		<csrf disabled="true"/>
 		<intercept-url pattern="/emp/auth/**" access="permitAll"/>
+		<intercept-url pattern="/emp/hrm/**" access="hasRole('ROLE_HRM')"/>
+		<intercept-url pattern="/emp/pms/fxtrs/*" access="hasAnyRole('ROLE_POS', 'ROLE_HKP')"/>
+		<intercept-url pattern="/emp/pms/**" access="hasAnyRole('ROLE_FTO', 'ROLE_HKP', 'ROLE_FMT')"/>
+		<intercept-url pattern="/emp/pos/**" access="hasRole('ROLE_POS')"/>
 		<intercept-url pattern="/emp/**" access="hasRole('ROLE_EMP')"/>
 	</http>
 	
@@ -75,6 +79,5 @@
 		<intercept-url pattern="/myinfo/**" access="hasRole('ROLE_USER')"/>
 		<intercept-url pattern="/recom/**" access="hasRole('ROLE_USER')"/>
 	</http>
-
 </beans:beans>
 

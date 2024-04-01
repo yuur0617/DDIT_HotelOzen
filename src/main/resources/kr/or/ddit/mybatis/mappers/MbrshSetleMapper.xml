@@ -85,11 +85,13 @@
 		    , MLG_YMD
 		    , MLG_AMNT
 		    , MLG_USE_CD
+		    , MLG_SORT
 		) VALUES (
 		    #{cstNo}
 		  , SYSDATE
 		  , #{mileage}
 		  , 'ADD'
+		  , '멤버십 가입'
 		)
 	</insert>
 	

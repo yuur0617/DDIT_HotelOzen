@@ -5,8 +5,8 @@
 <!-- 비품시작 -->
 
 	<sql id="fxtrsSearchFrag">
-		<trim prefixOverrides="OR"> 
-			<trim>
+		<trim prefix="WHERE" prefixOverrides="AND" > 
+			<trim prefix="(" suffix=")" prefixOverrides="OR">
 				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.fxtrsSearchWord)">
 					OR RQST_NO LIKE '%${paging.simpleCondition.fxtrsSearchWord}%'
 				</if>
@@ -21,11 +21,23 @@
 				</if>
 			</trim>
 			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.fxtrsOneSearchWord)">
-				AND RQST_SE LIKE '%${paging.simpleCondition.fxtrsOneSearchWord}%'
+				AND RQST_SE = '${paging.simpleCondition.fxtrsOneSearchWord}'
 			</if>
 		</trim>
 	</sql>
-
+	
+	<select id="selectTotalRecord"  parameterType="PaginationInfo" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM 
+			TB_FXTRS_RQST
+		WHERE 
+			EMP_NO = #{empNo} 
+		OR EMP_RQ_NO = #{empNo} 
+		OR EMP_PURCHS_NO = #{empNo}
+		<include refid="fxtrsSearchFrag" />
+	</select>
+	
 	<select id="fxtrsSelectList" parameterType="string" resultType="FxtrsRqstVO">
 		WITH RNUMFXTRS AS(
 		    SELECT
@@ -46,24 +58,39 @@
 		            , (SELECT EMP_NM FROM TB_EMP WHERE EMP_NO = TB_FXTRS_RQST.EMP_PURCHS_NO) EMP_PURCHS_NM
 		        FROM 
 		            TB_FXTRS_RQST
-		        WHERE (EMP_NO = #{empNo} OR EMP_RQ_NO = #{empNo} OR EMP_PURCHS_NO = #{empNo})
-		        <include refid="fxtrsSearchFrag"></include>
+		        WHERE EMP_NO = #{empNo} OR EMP_RQ_NO = #{empNo} OR EMP_PURCHS_NO = #{empNo}
+		        ORDER BY RQST_YMD DESC , RQST_PURCHS_YMD DESC)A
+		        <include refid="fxtrsSearchFrag"/>
 		        ORDER BY RQST_YMD DESC
-		    )A
+		    
 		)
 		SELECT *
 		FROM RNUMFXTRS
 		<![CDATA[
-		    WHERE RNUM >= #{paging.startRow} AND RNUM <= #{paging.endRow}
+		    WHERE RNUM >= #{paging.startRow} AND RNUM <= #{paging.endRow} 
 		]]>
 	</select>
 	
 	<select id="fxtrsSelectTotalRecord">
 		SELECT
 			COUNT(*)
-		FROM 
-			TB_FXTRS_RQST
-		WHERE EMP_NO = #{empNo} OR EMP_RQ_NO = #{empNo} OR EMP_PURCHS_NO = #{empNo}
+		FROM (
+		        SELECT 
+		            RQST_NO         
+				    , EMP_NO        
+				    , RQST_YMD      
+				    , RQST_AMNT     
+				    , RQST_PURCHS_YMD   
+				    , RQST_SE       
+				    , EMP_RQ_NO     
+				    , EMP_PURCHS_NO 
+				    , RQST_RQ_YMD
+				    , (SELECT EMP_NM FROM TB_EMP WHERE EMP_NO = TB_FXTRS_RQST.EMP_NO) EMP_NM
+		            , (SELECT EMP_NM FROM TB_EMP WHERE EMP_NO = TB_FXTRS_RQST.EMP_RQ_NO) EMP_RQ_NM
+		            , (SELECT EMP_NM FROM TB_EMP WHERE EMP_NO = TB_FXTRS_RQST.EMP_PURCHS_NO) EMP_PURCHS_NM
+		        FROM 
+		            TB_FXTRS_RQST 
+		WHERE EMP_NO = #{empNo} OR EMP_RQ_NO = #{empNo} OR EMP_PURCHS_NO = #{empNo}) T
 		<include refid="fxtrsSearchFrag" />
 	</select>
 
@@ -73,21 +100,25 @@
 <!-- 연차시작  -->
 
 	<sql id="annualSearchFrag">
-		<trim  prefixOverrides="OR">
-			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.annualSearchWord)">
-				OR EMP_NO LIKE '%${paging.simpleCondition.annualSearchWord}%'
-			</if>
-			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.annualSearchWord)">
-				OR EMP_NM LIKE '%${paging.simpleCondition.annualSearchWord}%'
-			</if>
-			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.annualSearchWord)">
-				OR EMP_RQ_NM LIKE '%${paging.simpleCondition.annualSearchWord}%'
-			</if>
+		<trim prefix="WHERE" prefixOverrides="AND">
+			<trim prefix="(" suffix=")" prefixOverrides="OR">
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.annualSearchWord)">
+					OR EMP_NO LIKE '%${paging.simpleCondition.annualSearchWord}%'
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.annualSearchWord)">
+					OR EMP_NM LIKE '%${paging.simpleCondition.annualSearchWord}%'
+				</if>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.annualSearchWord)">
+					OR EMP_RQ_NM LIKE '%${paging.simpleCondition.annualSearchWord}%'
+				</if>
+			</trim>
+				<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.annualOneSearchWord)">
+					AND RQST_SE = '${paging.simpleCondition.annualOneSearchWord}'
+				</if>
 		</trim>
-			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(paging.simpleCondition.annualOneSearchWord)">
-				OR RQST_SE LIKE '%${paging.simpleCondition.annualOneSearchWord}%'
-			</if>
 	</sql>
+
+
 
 	<select id="annSelectList" parameterType="string" resultType="AnnualVO">
 		WITH RNUMANNUAL AS(

@@ -3,14 +3,22 @@
 <mapper namespace="kr.or.ddit.mybatis.mappers.EmpFxtrsRqstMapper">
 
 	<sql id="searchFrag">
-		<trim prefix="WHERE" prefixOverrides="OR">
-	        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
-	            OR RQST_NO LIKE '%${simpleCondition.searchWord}%'
-	        </if>
-	        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
-	            OR RQST_SE LIKE '%${simpleCondition.searchWord}%'
-	        </if>
-		</trim>
+		<trim prefix="WHERE" prefixOverrides="AND">
+		    <trim prefix="(" suffix=")" prefixOverrides="OR">
+		        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		            OR RQST_NO LIKE '%${simpleCondition.searchWord}%'
+		        </if>
+		        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		            OR RQST_SE LIKE '%${simpleCondition.searchWord}%'
+		        </if>
+		        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		            OR EMP_NM LIKE '%${simpleCondition.searchWord}%'
+		        </if>
+			</trim>
+			<if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.selectOneSearchWord)">
+		        AND RQST_SE = '${simpleCondition.selectOneSearchWord}'
+		    </if>
+	   	</trim>
 	</sql>
 
 	<select id="selectTotalRecord" parameterType="PaginationInfo" resultType="int">
@@ -18,10 +26,19 @@
 		    COUNT(*)
 		FROM 
 			TB_FXTRS_RQST
+			INNER JOIN TB_EMP USING (EMP_NO)
 		<include refid="searchFrag" />
 	</select>
 
-	<select id="selectList" resultType="FxtrsRqstVO" parameterType="PaginationInfo">
+	<resultMap type="FxtrsRqstVO" id="FxtrsRqstMap" autoMapping="true">
+		<id property="rqstNo" column="RQST_NO"/>
+		<association property="emp" javaType="EmpVO">
+			<id property="empNo" column="EMP_NO"/>
+			<result property="empNm" column="EMP_NM"/>
+		</association>
+	</resultMap>
+
+	<select id="selectList" resultMap="FxtrsRqstMap" parameterType="PaginationInfo">
 		WITH RNUMFXTRS AS (
 			SELECT 
 				ROWNUM RNUM, A.*    
@@ -29,6 +46,7 @@
 				SELECT 
 				    RQST_NO
 				    , EMP_NO
+				    , EMP_NM
 				    , RQST_YMD
 				    , RQST_AMNT
 				    , RQST_SE
@@ -38,6 +56,7 @@
 				    , RQST_PURCHS_YMD
 				FROM 
 					TB_FXTRS_RQST
+					INNER JOIN TB_EMP USING (EMP_NO)
 				<include refid="searchFrag" />
 				ORDER BY 
 					RQST_NO DESC
@@ -157,6 +176,9 @@
 		    , FX_RQST_CNT
 		    , FX_UNIT
 		    , FX_RQST_TOTALAMNT
+		    , RQST_RQ_YMD
+		    , EMP_PURCHS_NO
+		    , RQST_PURCHS_YMD
 		FROM 
 			TB_FXTRS_RQST
 			INNER JOIN TB_EMP USING (EMP_NO)
@@ -175,12 +197,13 @@
 			EMP_NO = #{empRqNo}
 	</select>
 	
-	<update id="updateFxtrsApproval" parameterType="String">
+	<update id="updateFxtrsApproval" parameterType="Map">
 		UPDATE 
 			TB_FXTRS_RQST
 		SET
 		    RQST_SE = '구매대기'
 		    , RQST_RQ_YMD = SYSDATE
+   		    , EMP_PURCHS_NO = #{rqstPurchs}
 		WHERE
 		    RQST_NO = #{fxRqstNo}
 	</update>
@@ -194,4 +217,112 @@
 		WHERE
 		    RQST_NO = #{fxRqstNo}
 	</update>
+	
+	<select id="selectRqstPurchs" resultType="String">
+		SELECT 
+		    EMP_NO
+		FROM 
+			TB_EMP 
+		WHERE 
+			EMP_DEPT = 'POS' AND EMP_JBGD = 'DPM'
+	</select>
+	
+	<insert id="insertFxtrsAlram" parameterType="EmpAlramVO">
+		INSERT INTO TB_EMP_ALRAM (
+		    SANCTN_NO
+		    , EMP_NO
+		    , READ_YN
+		    , MESSAGE
+		    , ALRAM_NO
+		) VALUES (
+		    #{rqstNo}
+		    , #{empNo}
+		    , 'N'
+		    , '결재요청건 존재'
+		    , EMPSCHDL_SEQ.NEXTVAL
+		)
+	</insert>
+	
+	<select id="selectTotal" resultType="int">
+		SELECT 
+			COUNT(*)
+		FROM 
+			TB_FXTRS_RQST
+	</select>
+	
+	<select id="selectrqstTotal" resultType="int">
+		SELECT 
+			COUNT(*)
+		FROM 
+			TB_FXTRS_RQST
+		WHERE
+			RQST_SE = '요청대기'
+	</select>
+	
+	<select id="payTotal" resultType="int">
+		SELECT 
+			COUNT(*)
+		FROM 
+			TB_FXTRS_RQST
+		WHERE
+			RQST_SE = '구매대기'
+	</select>
+	
+	<select id="payClearTotal" resultType="int">
+		SELECT 
+			COUNT(*)
+		FROM 
+			TB_FXTRS_RQST
+		WHERE
+			RQST_SE = '구매완료'
+	</select>
+	
+	<select id="returnTotal" resultType="int">
+		SELECT 
+			COUNT(*)
+		FROM 
+			TB_FXTRS_RQST
+		WHERE
+			RQST_SE = '반려'
+	</select>
+	
+	<update id="updateFxtrsPur" parameterType="FxtrsRqstVO">
+		UPDATE
+			TB_FXTRS_RQST
+		SET
+			RQST_SE = #{rqstSe}
+			, RQST_PURCHS_YMD = SYSDATE
+		WHERE
+			RQST_NO = #{rqstNo}
+	
+	</update>
+
+	<select id="selectRqst" >
+			SELECT
+			    (SELECT SUM(TOTAL_COUNT) AS PROCEE_COUNT
+			FROM (
+			    SELECT COUNT(*) AS TOTAL_COUNT
+			    FROM TB_FXTRS_RQST
+			    WHERE EMP_NO = #{empNo}
+			    AND RQST_SE LIKE '%대기%'
+			    UNION ALL
+			    SELECT COUNT(*) AS TOTAL_COUNT
+			    FROM TB_ANNUAL_LEAVE_USE
+			    WHERE EMP_NO = #{empNo}
+			    AND RQST_SE LIKE '%대기%'
+			) ) PROCEEDING,
+			(SELECT SUM(TOTAL_COUNT) AS WAIT_COUNT
+			FROM (
+			    SELECT COUNT(*) AS TOTAL_COUNT
+			    FROM TB_FXTRS_RQST
+			    WHERE (EMP_RQ_NO = #{empNo} OR EMP_PURCHS_NO = #{empNo})
+			    AND RQST_SE LIKE '%대기%'
+			    UNION ALL
+			    SELECT COUNT(*) AS TOTAL_COUNT
+			    FROM TB_ANNUAL_LEAVE_USE
+			    WHERE EMP_RQ_NO = #{empNo}
+			    AND RQST_SE LIKE '%대기%'
+			) )WAITING
+			FROM DUAL
+	</select>
 </mapper>

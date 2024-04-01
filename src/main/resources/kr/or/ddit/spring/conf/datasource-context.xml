@@ -8,8 +8,8 @@
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.3.xsd">
 
 	<!-- 데이터베이스 연결 정보 -->
-	<util:properties id="dbInfo"
-		location="classpath:kr/or/ddit/db/dbInfo.properties" />
+<!-- 	<util:properties id="dbInfo" -->
+<!-- 		location="classpath:kr/or/ddit/db/dbInfo.properties" /> -->
 
 	<!-- JDBC Connection 생성, Connection Pooling -->
 	<bean id="dataSource"

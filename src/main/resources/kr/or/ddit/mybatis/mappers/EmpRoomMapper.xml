@@ -9,7 +9,10 @@
 		            OR RM_NO LIKE '%${simpleCondition.searchWord}%'
 		        </if>
 		        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
-		            OR RMT_TYPE_CD LIKE '%${simpleCondition.searchWord}%'
+		            OR RM_AVLBL_DETAILS LIKE '%${simpleCondition.searchWord}%'
+		        </if>
+		        <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.searchWord)">
+		            OR RMT_NM_DETAILS LIKE '%${simpleCondition.searchWord}%'
 		        </if>
 		    </trim>
 		    <if test="@org.apache.commons.lang3.StringUtils@isNotBlank(simpleCondition.selectOneSearchWord)">
@@ -26,10 +29,18 @@
 		    COUNT(*)
 		FROM 
 		    TB_ROOM
+		    INNER JOIN TB_ROOM_TYPE USING (RMT_TYPE_CD)
 		<include refid="searchFrag" />
 	</select>
 	
-	<select id="selectList" resultType="RoomVO" parameterType="PaginationInfo">
+	<resultMap type="RoomVO" id="RoomMap" autoMapping="true">
+		<id property="rmNo" column="RM_NO"/>
+		<association property="roomType" javaType="RoomTypeVO" autoMapping="true">
+			<id property="rmtTypeCd" column="RMT_TYPE_CD"/>
+		</association>
+	</resultMap>
+	
+	<select id="selectList" resultMap="RoomMap" parameterType="PaginationInfo">
 		WITH RNUMROOM AS(
 			SELECT
 				ROWNUM RNUM, A.*
@@ -37,11 +48,13 @@
 				SELECT 
 				    RM_NO
 				    , RMT_TYPE_CD
+				    , RMT_NM_DETAILS
 				    , RM_AVLBL_YN
 				    , RM_AVLBL_DETAILS
 				    , RM_CLEAN
 				FROM 
 					TB_ROOM
+					INNER JOIN TB_ROOM_TYPE USING (RMT_TYPE_CD)
 				<include refid="searchFrag" />
 				ORDER BY RM_CLEAN DESC, RM_AVLBL_DETAILS DESC, TO_NUMBER(SUBSTR(RM_NO, 2))
 			)A

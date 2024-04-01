@@ -44,6 +44,18 @@
 		SELECT
 		EMP_NT_NO
 		, EMP_NO
+		, (SELECT EMP_NM FROM TB_EMP WHERE TB_EMP.EMP_NO = TB_EMP_NOTICE.EMP_NO) AS EMP_NM
+        , (SELECT 
+                CASE WHEN TB_EMP.EMP_DEPT ='FTO' THEN '프론트오피스부'
+                WHEN TB_EMP.EMP_DEPT ='HKP' THEN '하우스키핑부'
+                WHEN TB_EMP.EMP_DEPT ='FMT' THEN '시설관리부'
+                WHEN TB_EMP.EMP_DEPT ='CRM' THEN '고객관리부'
+                WHEN TB_EMP.EMP_DEPT ='POS' THEN '재무부'
+                WHEN TB_EMP.EMP_DEPT ='HRM' THEN '인사부'
+                ELSE '부서미배정'
+                END AS EMP_DEPT
+            FROM TB_EMP WHERE TB_EMP.EMP_NO = TB_EMP_NOTICE.EMP_NO) AS EMP_DEPT
+        , (SELECT EMP_EML FROM TB_EMP WHERE TB_EMP.EMP_NO = TB_EMP_NOTICE.EMP_NO) AS EMP_EML
 		, EMP_NT_NM
 		, EMP_NT_YMD
 		, EMP_NT_CNT
@@ -149,6 +161,12 @@
 			autoMapping="true">
 			<id property="empNo" column="EMP_NO" />
 		</association>
+		<collection property="atchList" ofType="AtchmnflEmpNoticeVO">
+			<id property="attNo" column="ATT_NO"/>
+			<result property="empNtNo" column="EMP_NT_NO"/>
+			<result property="atcEmpNtUuid" column="ATC_EMP_NT_UUID"/>
+			<result property="atcEmpFileNm" column="ATC_EMP_FILE_NM"/>
+		</collection>
 	</resultMap>
 
 	<select id="selectList" parameterType="PaginationInfo"
@@ -166,17 +184,20 @@
 				, EMP_NT_CNT
 				, EMP_NT_CN
 				, EMP_NT_CLASSIFICATION
-				FROM TB_EMP_NOTICE
+                , (select count(*) from TB_ATCHMNFL_EMP_NOTICE  where EMP_NT_NO = TB_EMP_NOTICE.EMP_NT_NO ) AS ATC_CNT
+				FROM TB_EMP_NOTICE 
 				INNER JOIN TB_EMP USING(EMP_NO)
 				<include refid="searchFrag" />
-				ORDER BY EMP_NT_YMD DESC
+				ORDER BY EMP_NT_NO DESC
 			) A
+			
 		) B
 		<where>
 			<if test="startRow gt 0 and endRow gt 0">
 				RNUM BETWEEN #{startRow} AND #{endRow}
 			</if>
 		</where>
+		
 	</select>
 
 	<select id="selectNewEmpNtNo" resultType="string">
@@ -201,7 +222,6 @@
 		EMP_NT_NM = #{empNtNm,jdbcType=VARCHAR}
 		, EMP_NT_CN = #{empNtCn,jdbcType=CLOB}
 		, EMP_NT_CLASSIFICATION = #{empNtClassification,jdbcType=VARCHAR}
-		, EMP_NT_CNT = #{empNtCnt,jdbcType=NUMERIC}
 		WHERE EMP_NT_NO = #{empNtNo}
 	</update>
 

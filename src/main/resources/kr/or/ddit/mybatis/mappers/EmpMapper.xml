@@ -30,8 +30,11 @@
 				, 'POS', '재무부'
 				, 'CRM', '고객 관리부'
 			) AS EMP_DEPT_NAME
-			
-			, EMP_JBGD
+			, DECODE(
+				EMP_JBGD
+				, 'STF', '직원'
+				, 'DPM', '부장'
+			) AS EMP_JBGD
 			, EMP_JNCMP_YMD
 			, EMP_HOME_TEL
 			, EMP_EML
@@ -41,8 +44,9 @@
 			, EMP_PROFL_UUID
 			, EMP_ANNUAL_LEAVE
 			, EMP_BIRTH
+			, EXTRACT (YEAR FROM SYSDATE) - EXTRACT (YEAR FROM TB_EMP.EMP_JNCMP_YMD) +1 AS EMP_CAREER
 		FROM TB_EMP
-		WHERE EMP_NO = #{empNo}		
+		WHERE EMP_NO = #{empNo}
 	</select>
 	
 	<select id="selectList" resultType="EmpVO">
@@ -109,10 +113,33 @@
 	<select id="loginEmpVOs" resultType="EmpVO">
 		SELECT 
 			EMP_NO
-			, EMP_DEPT
+			, DECODE(EMP_DEPT
+				, 'FTO' , '프론트'
+				, 'HKP' , '객실 관리부'
+				, 'FMT' , '시설 관리부'
+				, 'CRM' , '고객 관리부'
+				, 'POS' , '재무부'
+				, 'HRM' , '인사부'
+				) AS EMP_DEPT
+			, EMP_JBGD
 		FROM TB_EMP 
 		WHERE 
 		    EMP_DEPT IN ('FMT', 'FTO', 'HRM', 'POS', 'CRM', 'HKP') 
 		    AND EMP_JBGD = 'DPM'
+		UNION
+		SELECT 
+			EMP_NO
+			, DECODE(EMP_DEPT
+				, 'FTO' , '프론트'
+				, 'HKP' , '객실 관리부'
+				, 'FMT' , '시설 관리부'
+				, 'CRM' , '고객 관리부'
+				, 'POS' , '재무부'
+				, 'HRM' , '인사부'
+				) AS EMP_DEPT
+			, EMP_JBGD
+		FROM TB_EMP
+		WHERE
+			EMP_NO = 'E230014'
 	</select>
 </mapper>

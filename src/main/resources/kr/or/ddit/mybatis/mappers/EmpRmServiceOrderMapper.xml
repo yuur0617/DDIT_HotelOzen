@@ -51,6 +51,7 @@
 			<id property="rsodNo" column="RSOD_NO"/>
 			<association property="rmService" javaType="RmserviceVO">
 				<id property="rsCd" column="RS_CD"/>
+				<result property="rsMenuNm" column="RS_MENU_NM"/>
 			</association>
 		</collection>
 	</resultMap>
@@ -68,6 +69,7 @@
 		            , RSOD_SE
 		            , CHKIN_NO
 		            , RS_CD
+		            , RS_MENU_NM
 		        FROM 
 		            TB_RMSERVICE_ORDER 
 		            INNER JOIN TB_RMSERVICE_DETAILS USING (RSOD_NO)
@@ -75,7 +77,7 @@
 		            INNER JOIN TB_CHKIN USING(CHKIN_NO)
 		            INNER JOIN TB_CSTMR USING (CST_NO)
 		        <include refid="searchFrag" />
-		        GROUP BY RSOD_NO, RM_NO, CST_NM, RSOD_DT, RSOD_SE, CHKIN_NO, RS_CD
+		        GROUP BY RSOD_NO, RM_NO, CST_NM, RSOD_DT, RSOD_SE, CHKIN_NO, RS_CD, RS_MENU_NM
 		        ORDER BY RSOD_NO DESC
 		    )A
 		)

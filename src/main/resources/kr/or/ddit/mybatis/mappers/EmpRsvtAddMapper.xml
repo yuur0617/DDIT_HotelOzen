@@ -31,7 +31,9 @@
 			TB_RSVT_DETAILS 
 			INNER JOIN TB_RSVT USING(RSVT_NO)
 		WHERE 
-			RSVT_CHECKIN_YMD = TRUNC(SYSDATE)  
+			<![CDATA[
+			TO_DATE(RSVT_CHECKIN_YMD) <= TRUNC(SYSDATE) 
+			]]> 
 		    AND RSVT_SE = '예약중'
             AND RMT_TYPE_CD = #{rmtTypeCd}
 	</select>

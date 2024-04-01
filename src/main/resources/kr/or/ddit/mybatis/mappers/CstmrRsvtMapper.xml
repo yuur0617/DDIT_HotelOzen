@@ -31,11 +31,9 @@
 			RERM_AGE = #{age} AND RERM_NMPR = #{totalNmpr}
 	</select>
 
-	<resultMap id="attatchRmTypeMap" type="AttatchRmTypeVO"
-		autoMapping="true">
+	<resultMap id="attatchRmTypeMap" type="AttatchRmTypeVO" autoMapping="true">
 		<id property="attNo" column="ATT_NO" />
-		<collection property="rmtype" ofType="RoomTypeVO"
-			autoMapping="true">
+		<collection property="rmtype" ofType="RoomTypeVO" autoMapping="true">
 			<result property="rmtTypeCd" column="RMT_TYPE_CD" />
 		</collection>
 	</resultMap>
@@ -224,7 +222,7 @@
 				CASE
 				WHEN COUNT(*) > 0 THEN 'N' ||
 					SUBSTR(TO_CHAR(EXTRACT(YEAR FROM SYSDATE)), 3, 2) ||
-					LPAD(max(SUBSTR((cst_no), -2, 5)) +1 , 5, '0')
+					LPAD(max(SUBSTR((cst_no), -5)) +1 , 5, '0')
 				ELSE
 					'M' || SUBSTR(TO_CHAR(EXTRACT(YEAR FROM SYSDATE)), 3, 2) || 
 					LPAD('1', 5, '0')
@@ -240,7 +238,7 @@
 				CASE
 				WHEN COUNT(*) > 0 THEN 'CPRO' ||
 					TO_CHAR(SYSDATE, 'YYMM')||
-					LPAD(MAX(SUBSTR((SETLE_NO), -2, 4)) +1, 4, '0')
+					LPAD(MAX(SUBSTR((SETLE_NO), -4)) +1, 4, '0')
 				ELSE
 					'CPRO' || TO_CHAR(SYSDATE, 'YYMM') || LPAD('1', 4, '0')
 				END
@@ -253,7 +251,7 @@
 			SELECT
 				CASE
 				WHEN COUNT(*) > 0 THEN 'RSV' || TO_CHAR(SYSDATE, 'YYMM') ||
-					LPAD(MAX(SUBSTR((RSVT_NO), -2, 4)) + 1, 4, '0')
+					LPAD(MAX(SUBSTR((RSVT_NO), -4)) + 1, 4, '0')
 				ELSE
 					'RSV' || TO_CHAR(SYSDATE, 'YYMM') || LPAD('1', 4, '0')
 				END
@@ -272,4 +270,42 @@
 		    WHERE
 		        SUBSTR(RSVT_DTL_NO, 5, 4) LIKE TO_CHAR(SYSDATE, 'YYMM')
 	</select>
+	
+	<resultMap type="CouponIsnVO" id="couponMap" autoMapping="true">
+		<collection property="couponVO" ofType="CouponVO" autoMapping="true">
+			<result property="cpnNo" column="CPN_NO"/>
+		</collection>
+	</resultMap>
+	
+	<select id="selectCouponIsn" parameterType="map" resultMap="couponMap">
+		SELECT
+			CPN_NO
+			, CST_NO
+			, CPNK_NO
+			, CPN_AVAIL_YN
+			, CPN_USE_YMD
+			, CPNK_NM
+			, CPN_USE
+			, CPN_DSCNT_PRICE
+		FROM
+			TB_COUPON_ISN INNER JOIN TB_COUPON USING (CPNK_NO)
+		WHERE
+			CPN_AVAIL_YN = 'Y'
+			AND CPN_EXPRT_YMD <![CDATA[ >= ]]> SYSDATE
+            AND (CPN_USE = '객실'
+            OR (CPNK_NM LIKE '%' || #{roomTypeNm} || '%' AND CPN_USE = '숙박권'))
+            AND CST_NO = #{cstNo}
+            ORDER BY CPNK_NM DESC
+	</select>
+	
+	<update id="updateCouponIsn" parameterType="CouponIsnVO">
+		UPDATE TB_COUPON_ISN
+		SET
+			CPN_AVAIL_YN = 'U'
+			, CPN_USE_YMD = SYSDATE
+		WHERE
+			CPN_NO = #{cpnNo}
+			AND CST_NO = #{cstNo}
+	</update>
+	
 </mapper>
